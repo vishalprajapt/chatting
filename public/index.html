@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Chat App</title>
+    <style>
+      body { 
+        font-family: sans-serif; 
+        margin: 0;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        height: 100vh;
+      }
+
+      /* Login Screen */
+      #login {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        background: #f5f5f5;
+      }
+      #login form {
+        background: white;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+      }
+      #login input {
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+      }
+      #login button {
+        padding: 10px 15px;
+        border: none;
+        background: #4caf50;
+        color: white;
+        border-radius: 5px;
+        cursor: pointer;
+        margin-left: 5px;
+      }
+
+      /* Chat Screen */
+      #chat {
+        display: none;
+        flex-direction: column;
+        height: 100vh;
+      }
+
+      /* Chat Header */
+      #chatHeader {
+        background: #4caf50;
+        color: white;
+        padding: 15px;
+        text-align: center;
+        font-weight: bold;
+        font-size: 18px;
+        position: sticky;
+        top: 0;
+      }
+
+      /* Messages */
+      #messages {
+        list-style: none; 
+        padding: 10px; 
+        margin: 0;
+        flex: 1;
+        overflow-y: auto; 
+        background: #f8f5f5;
+      }
+      #messages li {
+        padding: 8px 12px;
+        margin-bottom: 5px;
+        border-radius: 10px;
+        background: #4a4949;
+        color: white;
+        max-width: 70%;
+      }
+      .me {
+        background: #4caf50;
+        color: white;
+        margin-left: auto;
+      }
+
+      /* Input Form */
+      #form {
+        display: flex;
+        padding: 10px;
+        background: white;
+        border-top: 1px solid #ccc;
+        position: sticky;
+        bottom: 0;
+      }
+      #input { 
+        flex: 1; 
+        padding: 10px; 
+        border: 1px solid #ccc; 
+        border-radius: 20px; 
+        outline: none;
+      }
+      button.send-btn {
+        margin-left: 10px;
+        padding: 10px 15px;
+        border: none;
+        background: #4caf50;
+        color: white;
+        border-radius: 20px;
+        cursor: pointer;
+      }
+      button.send-btn:hover {
+        background: #45a049;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Login Form -->
+    <div id="login">
+      <form id="loginForm">
+        <input type="text" id="usernameInput" placeholder="Enter your name" required />
+        <button type="submit">Join Chat</button>
+      </form>
+    </div>
+
+    <!-- Chat UI -->
+    <div id="chat">
+      <div id="chatHeader">Chat</div> <!-- User name will show here -->
+      <ul id="messages"></ul>
+      <form id="form">
+        <input id="input" autocomplete="off" placeholder="Type a message..." />
+        <button class="send-btn">Send</button>
+      </form>
+    </div>
+
+    <!-- socket.io client -->
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+      const socket = io();
+      let username = "";
+
+      const loginDiv = document.getElementById("login");
+      const chatDiv = document.getElementById("chat");
+      const loginForm = document.getElementById("loginForm");
+      const usernameInput = document.getElementById("usernameInput");
+      const chatHeader = document.getElementById("chatHeader");
+
+      const form = document.getElementById("form");
+      const input = document.getElementById("input");
+      const messages = document.getElementById("messages");
+
+      // Login submit
+      loginForm.addEventListener("submit", (e) => {
+        e.preventDefault();
+        username = usernameInput.value.trim();
+        if (username) {
+          loginDiv.style.display = "none";  // hide login
+          chatDiv.style.display = "flex";   // show chat
+          chatHeader.textContent = "You are chatting as: " + username; // show name on top
+        }
+      });
+
+      // Send message
+      form.addEventListener("submit", (e) => {
+        e.preventDefault();
+        if (input.value) {
+          socket.emit("chat message", { user: username, text: input.value });
+          input.value = "";
+        }
+      });
+
+      // Receive message
+      socket.on("chat message", (msg) => {
+        const item = document.createElement("li");
+        item.textContent = msg.user + ": " + msg.text;
+
+        if (msg.user === username) {
+          item.classList.add("me");
+        }
+
+        messages.appendChild(item);
+        messages.scrollTop = messages.scrollHeight;
+      });
+    </script>
+  </body>
+</html>
