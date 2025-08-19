@@ -10,7 +10,7 @@
       padding: 0;
       display: flex;
       flex-direction: column;
-      height: 100vh;
+      height: 100%; /* 100vh → 100% */
     }
 
     /* Login Screen */
@@ -18,7 +18,7 @@
       display: flex;
       justify-content: center;
       align-items: center;
-      height: 100vh;
+      height: 100%;
       background: #f5f5f5;
       padding: 20px;
     }
@@ -54,7 +54,7 @@
     #chat {
       display: none;
       flex-direction: column;
-      height: 100vh;
+      height: 100%; /* 100vh → 100% */
     }
 
     /* Chat Header */
@@ -126,73 +126,78 @@
   </style>
 </head>
 
-  <body>
-    <!-- Login Form -->
-    <div id="login">
-      <form id="loginForm">
-        <input type="text" id="usernameInput" placeholder="Enter your name" required />
-        <button type="submit">Join Chat</button>
-      </form>
-    </div>
+<body>
+  <!-- Login Form -->
+  <div id="login">
+    <form id="loginForm">
+      <input type="text" id="usernameInput" placeholder="Enter your name" required />
+      <button type="submit">Join Chat</button>
+    </form>
+  </div>
 
-    <!-- Chat UI -->
-    <div id="chat">
-      <div id="chatHeader">Chat</div> <!-- User name will show here -->
-      <ul id="messages"></ul>
-      <form id="form">
-        <input id="input" autocomplete="off" placeholder="Type a message..." />
-        <button class="send-btn">Send</button>
-      </form>
-    </div>
+  <!-- Chat UI -->
+  <div id="chat">
+    <div id="chatHeader">Chat</div> <!-- User name will show here -->
+    <ul id="messages"></ul>
+    <form id="form">
+      <input id="input" autocomplete="off" placeholder="Type a message..." />
+      <button class="send-btn">Send</button>
+    </form>
+  </div>
 
-    <!-- socket.io client -->
-    <script src="/socket.io/socket.io.js"></script>
-    <script>
-      const socket = io();
-      let username = "";
+  <!-- socket.io client -->
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    const socket = io();
+    let username = "";
 
-      const loginDiv = document.getElementById("login");
-      const chatDiv = document.getElementById("chat");
-      const loginForm = document.getElementById("loginForm");
-      const usernameInput = document.getElementById("usernameInput");
-      const chatHeader = document.getElementById("chatHeader");
+    const loginDiv = document.getElementById("login");
+    const chatDiv = document.getElementById("chat");
+    const loginForm = document.getElementById("loginForm");
+    const usernameInput = document.getElementById("usernameInput");
+    const chatHeader = document.getElementById("chatHeader");
 
-      const form = document.getElementById("form");
-      const input = document.getElementById("input");
-      const messages = document.getElementById("messages");
+    const form = document.getElementById("form");
+    const input = document.getElementById("input");
+    const messages = document.getElementById("messages");
 
-      // Login submit
-      loginForm.addEventListener("submit", (e) => {
-        e.preventDefault();
-        username = usernameInput.value.trim();
-        if (username) {
-          loginDiv.style.display = "none";  // hide login
-          chatDiv.style.display = "flex";   // show chat
-          chatHeader.textContent = "You are chatting as: " + username; // show name on top
-        }
-      });
+    // Login submit
+    loginForm.addEventListener("submit", (e) => {
+      e.preventDefault();
+      username = usernameInput.value.trim();
+      if (username) {
+        loginDiv.style.display = "none";  // hide login
+        chatDiv.style.display = "flex";   // show chat
+        chatHeader.textContent = "You are chatting as: " + username; // show name on top
+      }
+    });
 
-      // Send message
-      form.addEventListener("submit", (e) => {
-        e.preventDefault();
-        if (input.value) {
-          socket.emit("chat message", { user: username, text: input.value });
-          input.value = "";
-        }
-      });
+    // Send message
+    form.addEventListener("submit", (e) => {
+      e.preventDefault();
+      if (input.value) {
+        socket.emit("chat message", { user: username, text: input.value });
+        input.value = "";
+      }
+    });
 
-      // Receive message
-      socket.on("chat message", (msg) => {
-        const item = document.createElement("li");
-        item.textContent = msg.user + ": " + msg.text;
+    // Receive message
+    socket.on("chat message", (msg) => {
+      const item = document.createElement("li");
+      item.textContent = msg.user + ": " + msg.text;
 
-        if (msg.user === username) {
-          item.classList.add("me");
-        }
+      if (msg.user === username) {
+        item.classList.add("me");
+      }
 
-        messages.appendChild(item);
-        messages.scrollTop = messages.scrollHeight;
-      });
-    </script>
-  </body>
+      messages.appendChild(item);
+      messages.scrollTop = messages.scrollHeight;
+    });
+
+    // Mobile keyboard fix → jab keyboard open ho to auto scroll bottom
+    window.addEventListener("resize", () => {
+      messages.scrollTop = messages.scrollHeight;
+    });
+  </script>
+</body>
 </html>
