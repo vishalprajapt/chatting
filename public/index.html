@@ -10,7 +10,8 @@
       padding: 0;
       display: flex;
       flex-direction: column;
-      height: 100%; /* 100vh → 100% */
+      height: 100%;
+      overflow: hidden;
     }
 
     /* Login Screen */
@@ -54,7 +55,7 @@
     #chat {
       display: none;
       flex-direction: column;
-      height: 100%; /* 100vh → 100% */
+      height: 100%;
     }
 
     /* Chat Header */
@@ -99,8 +100,10 @@
       padding: 10px;
       background: white;
       border-top: 1px solid #ccc;
-      position: sticky;
+      position: fixed;
       bottom: 0;
+      left: 0;
+      right: 0;
       gap: 10px;
     }
     #input { 
@@ -137,7 +140,7 @@
 
   <!-- Chat UI -->
   <div id="chat">
-    <div id="chatHeader">Chat</div> <!-- User name will show here -->
+    <div id="chatHeader">Chat</div>
     <ul id="messages"></ul>
     <form id="form">
       <input id="input" autocomplete="off" placeholder="Type a message..." />
@@ -166,9 +169,10 @@
       e.preventDefault();
       username = usernameInput.value.trim();
       if (username) {
-        loginDiv.style.display = "none";  // hide login
-        chatDiv.style.display = "flex";   // show chat
-        chatHeader.textContent = "You are chatting as: " + username; // show name on top
+        loginDiv.style.display = "none";
+        chatDiv.style.display = "flex";
+        chatHeader.textContent = "You are chatting as: " + username;
+        adjustHeight();
       }
     });
 
@@ -185,18 +189,26 @@
     socket.on("chat message", (msg) => {
       const item = document.createElement("li");
       item.textContent = msg.user + ": " + msg.text;
-
       if (msg.user === username) {
         item.classList.add("me");
       }
-
       messages.appendChild(item);
       messages.scrollTop = messages.scrollHeight;
     });
 
-    // Mobile keyboard fix → jab keyboard open ho to auto scroll bottom
-    window.addEventListener("resize", () => {
+    // ✅ Mobile keyboard fix
+    function adjustHeight() {
+      document.body.style.height = window.innerHeight + "px";
       messages.scrollTop = messages.scrollHeight;
+    }
+
+    window.addEventListener("resize", adjustHeight);
+    window.addEventListener("load", adjustHeight);
+
+    input.addEventListener("focus", () => {
+      setTimeout(() => {
+        messages.scrollTop = messages.scrollHeight;
+      }, 300);
     });
   </script>
 </body>
