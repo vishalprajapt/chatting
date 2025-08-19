@@ -100,7 +100,8 @@
       padding: 10px;
       background: white;
       border-top: 1px solid #ccc;
-      position: absolute;   /* ✅ fixed se absolute */
+      position: fixed;   /* ✅ fixed bottom */
+      bottom: 0;
       left: 0;
       right: 0;
       gap: 10px;
@@ -195,15 +196,10 @@
       messages.scrollTop = messages.scrollHeight;
     });
 
-    // ✅ Mobile keyboard fix
+    // ✅ Mobile keyboard fix (only adjust messages)
     function adjustHeight() {
       const vh = window.innerHeight;
       document.body.style.height = vh + "px";
-
-      // form ko bottom pe lagao
-      form.style.top = (vh - form.offsetHeight) + "px";
-
-      // messages height adjust
       messages.style.height = (vh - chatHeader.offsetHeight - form.offsetHeight) + "px";
       messages.scrollTop = messages.scrollHeight;
     }
@@ -212,7 +208,10 @@
     window.addEventListener("load", adjustHeight);
 
     input.addEventListener("focus", () => {
-      setTimeout(adjustHeight, 300); // keyboard open hone ke baad adjust
+      setTimeout(adjustHeight, 300);
+    });
+    input.addEventListener("blur", () => {
+      setTimeout(adjustHeight, 300);
     });
   </script>
 </body>
